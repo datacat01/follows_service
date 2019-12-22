@@ -44,9 +44,9 @@ defmodule FollowsService do
           uuid = List.first(repo.all(query))
           flwr_flwd = ini_struct(flwr_id, flwd_id, uuid)
           repo.delete(flwr_flwd)
-          uuid
+          Ecto.UUID.cast(uuid)
         true ->
-          nil
+          {:ok, nil}
       end
     end)
   end

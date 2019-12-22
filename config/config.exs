@@ -1,5 +1,24 @@
 import Config
 
+config :kaffe,
+producer: [
+  endpoints: [localhost: 9092],
+  # endpoints references [hostname: port]. Kafka is configured to run on port 9092.
+  # In this example, the hostname is localhost because we've started the Kafka server
+  # straight from our machine. However, if the server is dockerized, the hostname will
+  # be called whatever is specified by that container (usually "kafka")
+  topics: ["follows_service_topic"], # add a list of topics you plan to produce messages to
+]
+
+config :kaffe,
+consumer: [
+  endpoints: [localhost: 9092],               
+  topics: ["follow_topic", "unfollow_topic"],     # the topic(s) that will be consumed
+  consumer_group: "example-consumer-group",   # the consumer group for tracking offsets in Kafka
+  message_handler: FollowsConsumer,           # the module that will process messages
+]
+
+
 config :follows_service, Follows.Repo,
   database: "follows_service_repo",
   username: "olyapashneva",
@@ -8,32 +27,3 @@ config :follows_service, Follows.Repo,
 
 config :follows_service, ecto_repos: [Follows.Repo]
 
-config :kafka_ex,
-  brokers: [
-    {"localhost", 9092},
-    # {"localhost", 9093},
-    # {"localhost", 9094}
-  ],
-
-  consumer_group: "kafka_ex",
-  client_id: "kafka_ex",
-  disable_default_worker: false,
-  sync_timeout: 3000,
-  max_restarts: 10,
-  max_seconds: 60,
-  commit_interval: 5_000,
-  commit_threshold: 100,
-  sleep_for_reconnect: 400,
-  use_ssl: false,
-    # ssl_options: [
-    #   cacertfile: File.cwd!() <> "/ssl/ca-cert",
-    #   certfile: File.cwd!() <> "/ssl/cert.pem",
-    #   keyfile: File.cwd!() <> "/ssl/key.pem"
-    # ],
-  kafka_version: "2.4.0"
-
-env_config = Path.expand("#{Mix.env()}.exs", __DIR__)
-  
-if File.exists?(env_config) do
-  import_config(env_config)
-end
