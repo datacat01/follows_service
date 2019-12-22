@@ -1,9 +1,11 @@
 defmodule Follows.FlwrFlwdPair do
     use Ecto.Schema
+    
+    @primary_key false
   
-    schema "flwr_flwd_pair" do
+    schema "follower_followed" do
       field :uuid, :string
       field :follower_id, :string
-      field :followed_id, :integer
+      field :followed_id, :string
     end
   end
