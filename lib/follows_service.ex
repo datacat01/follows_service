@@ -8,7 +8,12 @@ defmodule FollowsService do
     flwr_flwd = %{flwr_flwd | follower_id: flwr_id}
     flwr_flwd = %{flwr_flwd | followed_id: flwd_id}
 
-    query = from f in "follower_followed", where: f.follower_id == ^flwr_id and f.followed_id == ^flwd_id, select: f.uuid
+    query = from(
+      f in "follower_followed",
+      where: f.follower_id == ^flwr_id and f.followed_id == ^flwd_id,
+      select: f.uuid,
+      limit: 1
+    )
     if List.first(Follows.Repo.all(query)) == nil do
       Follows.Repo.insert(flwr_flwd)
     end
