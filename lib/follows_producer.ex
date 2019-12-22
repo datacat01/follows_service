@@ -1,11 +1,11 @@
 defmodule FollowsProducer do
-    def follow({key, value}) do
-        Kaffe.Producer.produce_sync("follow_topic", [{key, value}])
+    def follow(uuid, value) do
+        Kaffe.Producer.produce_sync("follow_topic", [uuid, value])
     end
 
     def unfollow(uuid) do
         if uuid != nil do
-            Kaffe.Producer.produce_sync("followers_topic", [{uuid, 1}])
+            Kaffe.Producer.produce_sync("followers_topic", [uuid, nil])
         end
     end
 

@@ -8,12 +8,13 @@ def handle_message(%{key: key, value: value} = message) do
     cond do
         message[:topic] == "follow_topic" ->
             if key!=value do
-                FollowsService.follow(key, value)
+                [uuid | flwr_flwd_id] = FollowsService.follow(key, value)
+                FollowsProducer.follow(uuid, flwr_flwd_id)
             end
         message[:topic] == "unfollow_topic" ->
             if key!=value do
-                [response | uuid] = Tuple.to_list(FollowsService.unfollow(key, value))
-                FollowsProducer.unfollow(uuid[:ok])
+                uuid = elem((FollowsService.unfollow(key, value)), 1)
+                FollowsProducer.unfollow(uuid)
             end
     end
   :ok
