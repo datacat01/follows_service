@@ -14,9 +14,9 @@ defmodule OtherProducer do
       Kaffe.Producer.produce_sync("follows_topic", [{key, value}])
     end
     def follows_num({key, value}) do
-        Kaffe.Producer.produce_sync("followers_num_topic", [{key, value}])
+        Kaffe.Producer.produce_sync("follows_bum_topic", [{key, value}])
     end
     def all_followers({key, value}) do
-        Kaffe.Producer.produce_sync("followers_all_topic", [{key, value}])
+        Kaffe.Producer.produce_sync("follows_all_topic", [{key, value}])
     end
   end
