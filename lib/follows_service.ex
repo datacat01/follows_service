@@ -30,7 +30,7 @@ defmodule FollowsService do
       end
     end)
 
-    [elem(Ecto.UUID.cast(uuid), 1), flwr_id, flwd_id]
+    flwr_flwd
   end
 
 
@@ -44,8 +44,7 @@ defmodule FollowsService do
           uuid = List.first(repo.all(query))
           flwr_flwd = ini_struct(flwr_id, flwd_id, uuid)
           repo.delete(flwr_flwd)
-          
-          elem(Ecto.UUID.cast(uuid), 1)
+          uuid
         true ->
           nil
       end
