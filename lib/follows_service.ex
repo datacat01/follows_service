@@ -49,9 +49,9 @@ defmodule FollowsService do
           flwr_flwd = ini_struct(flwr_id, flwd_id, uuid)
           repo.delete(flwr_flwd)
           
-          elem(Ecto.UUID.cast(uuid), 1)
+          response = Ecto.UUID.cast(uuid)
         true ->
-          nil
+          response = nil
       end
     end)
   end
