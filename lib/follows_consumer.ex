@@ -10,7 +10,7 @@ defmodule FollowsConsumer do
             uuid = FollowsService.follow(message[:key], message[:value])
             uuid = elem(elem(uuid, 1), 1)
             IO.puts("uuid: #{uuid}")
-            # FollowsProducer.follow_msg({uuid, [message[:key], message[:value]]})
+            FollowsProducer.follow_msg({uuid, [message[:key], message[:value]]})
         true ->
             IO.inspect(message)
             IO.puts("#{key}: #{value}")
