@@ -56,5 +56,18 @@ defmodule FollowsService do
     end)
   end
 
+
+  def get_followers_num(flwd_id) do
+    res = Follows.Repo.one(
+      from f in "follower_followed", where: f.followed_id == ^flwd_id, select: count(f.uuid)
+    )
+  end
+
+  
+  def get_all_followers(flwd_id) do
+    res = Follows.Repo.all(
+      from f in "follower_followed", where: f.followed_id == ^flwd_id, select: f.follower_id
+    )
+  end
   
 end
