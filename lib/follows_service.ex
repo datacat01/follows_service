@@ -24,13 +24,17 @@ defmodule FollowsService do
     flwr_flwd = ini_struct(flwr_id, flwd_id, uuid)
     query = select_query(flwr_id, flwd_id)
 
+
     Follows.Repo.transaction(fn repo ->
-      if List.first(repo.all(query)) == nil do 
+      match = repo.all(query)
+      if List.first(match) == nil do 
         repo.insert(flwr_flwd)
+        response = Ecto.UUID.cast(uuid)
+      else 
+        response = Ecto.UUID.cast(List.first(match))
       end
     end)
 
-    flwr_flwd
   end
 
 
@@ -44,7 +48,8 @@ defmodule FollowsService do
           uuid = List.first(repo.all(query))
           flwr_flwd = ini_struct(flwr_id, flwd_id, uuid)
           repo.delete(flwr_flwd)
-          uuid
+          
+          elem(Ecto.UUID.cast(uuid), 1)
         true ->
           nil
       end

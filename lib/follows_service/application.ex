@@ -10,6 +10,7 @@ defmodule FollowsService.Application do
 
     children = [
       Follows.Repo,
+      worker(Kaffe.Consumer, [])
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
