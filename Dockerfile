@@ -1,46 +1,84 @@
-FROM elixir:1.9.4 as builder
-ENV VERSION 0.1.0
+# The version of Alpine to use for the final image
+# This should match the version of Alpine that the `elixir:1.7.2-alpine` image uses
+ARG ALPINE_VERSION=3.8
 
-WORKDIR /opt/server-builder/
-COPY . /opt/server-builder/
+FROM elixir:1.9.1-alpine AS builder
 
-RUN mix local.hex --force && mix local.rebar --force
-RUN MIX_ENV=prod mix do deps.get --only prod, deps.compile --force
-RUN mix deps.clean mime --build
-RUN MIX_ENV=prod mix distillery.release --env=prod
-RUN APP_NAME="follows_service" && \
-    mkdir -p /opt/${APP_NAME} && \
-    MIX_ENV=prod mix distillery.release --verbose && \
-    cp /opt/server-builder/_build/prod/rel/follows_service/releases/0.1.0/follows_service.tar.gz /opt/${APP_NAME} && \
-    cd /opt/${APP_NAME} && \
-    tar -xzf ${APP_NAME}.tar.gz && \
-    rm ${APP_NAME}.tar.gz
-RUN rm -rf /opt/server-builder
+# The following are build arguments used to change variable parts of the image.
+# The name of your application/release (required)
+# ARG APP_NAME="follows_service"
+ARG APP_NAME
+# The version of the application we are building (required)
+# ARG APP_VSN="0.1.0"
+ARG APP_VSN
+# The environment to build with
+ARG MIX_ENV=prod
+# Set this to true if this release is not a Phoenix app
+ARG SKIP_PHOENIX=true
+# If you are using an umbrella project, you can change this
+# argument to the directory the Phoenix app is in so that the assets
+# can be built
+ARG PHOENIX_SUBDIR=.
 
+ENV SKIP_PHOENIX=${SKIP_PHOENIX} \
+    APP_NAME=${APP_NAME} \
+    APP_VSN=${APP_VSN} \
+    MIX_ENV=${MIX_ENV}
 
+# By convention, /opt is typically used for applications
+WORKDIR /opt/${APP_NAME}
 
-# FROM alpine:3.9
+# This step installs all the build tools we'll need
+RUN apk update && \
+  apk upgrade --no-cache && \
+  apk add --no-cache \
+    nodejs \
+    yarn \
+    git \
+    build-base && \
+  mix local.rebar --force && \
+  mix local.hex --force
 
-# ENV LANG C.UTF-8 \
-#   REFRESHED_AT 2019-09-14-1 \
-#   TERM xterm \
-#   DEBIAN_FRONTEND noninteractive
+# This copies our app source code into the build container
+COPY . .
 
-# ENV REPLACE_OS_VARS=true \
-#   HOSTNAME=${HOSTNAME} \
-#   ERL_CRASH_DUMP_SECONDS=10 \
-#   HEART_BEAT_TIMEOUT=30 \
-#   HEART_KILL_SIGNAL=SIGABRT \
-#   HEART_NO_KILL=0 \
-#   HEART_COMMAND=reboot
+RUN mix do deps.get, deps.compile, compile
 
-# RUN apk add --update \
-#   bash \
-#   openssl
+# This step builds assets for the Phoenix app (if there is one)
+# If you aren't building a Phoenix app, pass `--build-arg SKIP_PHOENIX=true`
+# This is mostly here for demonstration purposes
+RUN if [ ! "$SKIP_PHOENIX" = "true" ]; then \
+  cd ${PHOENIX_SUBDIR}/assets && \
+  yarn install && \
+  yarn deploy && \
+  cd - && \
+  mix phx.digest; \
+fi
 
-# COPY --from=builder /opt/server /usr/local/bin/server
-# WORKDIR /usr/local/bin/server/bin
-# USER default
-# EXPOSE 8081 50051
+RUN \
+  mkdir -p /opt/built && \
+  mix distillery.release --verbose && \
+  cp _build/${MIX_ENV}/rel/${APP_NAME}/releases/${APP_VSN}/${APP_NAME}.tar.gz /opt/built && \
+  cd /opt/built && \
+  tar -xzf ${APP_NAME}.tar.gz && \
+  rm ${APP_NAME}.tar.gz
 
-# CMD /bin/bash
+# From this line onwards, we're in a new image, which will be the image used in production
+FROM alpine:${ALPINE_VERSION}
+
+# The name of your application/release (required)
+ARG APP_NAME
+
+RUN apk update && \
+    apk add --no-cache \
+      bash \
+      openssl-dev
+
+ENV REPLACE_OS_VARS=true \
+    APP_NAME=${APP_NAME}
+
+WORKDIR /opt/${APP_NAME}
+
+COPY --from=builder /opt/built .
+
+CMD trap 'exit' INT; /opt/app/bin/${APP_NAME} foreground
