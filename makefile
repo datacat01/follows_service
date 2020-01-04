@@ -12,7 +12,8 @@ clean: ## Clean build artifacts
 	mix clean
 
 run: ## Run the app from Docker
-	docker run --stop-signal=SIGINT --env PORT=4000 --expose 4000 -p 4000:4000 --rm -it $(APP_NAME):latest
+	docker run --expose 4000 -p 4000:4000 \
+		--rm -it $(APP_NAME):latest
 
 image: ## Build a Docker image
 	docker build --build-arg APP_NAME=$(APP_NAME) \

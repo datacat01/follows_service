@@ -2,7 +2,7 @@ version: '2'
 services:
   follows_service:
     build: .
-    image: follows_service
+    image: follows_service:latest
     depends_on: 
       - zookeeper
       - kafka
