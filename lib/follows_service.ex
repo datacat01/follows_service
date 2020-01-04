@@ -12,7 +12,6 @@ defmodule FollowsService do
 
   def ini_struct(flwr_id, flwd_id, uuid) do
     flwr_flwd = %Follows.FlwrFlwdPair{}
-
     flwr_flwd = %{flwr_flwd | uuid: uuid}
     flwr_flwd = %{flwr_flwd | follower_id: flwr_id}
     flwr_flwd = %{flwr_flwd | followed_id: flwd_id}
@@ -57,11 +56,11 @@ defmodule FollowsService do
   end
 
 
-  # def get_followers_num(flwd_id) do
-  #   res = Follows.Repo.one(
-  #     from f in "follower_followed", where: f.followed_id == ^flwd_id, select: count(f.uuid)
-  #   )
-  # end
+  def get_followers_num(flwd_id) do
+    res = Follows.Repo.one(
+      from f in "follower_followed", where: f.followed_id == ^flwd_id, select: count(f.uuid)
+    )
+  end
 
 
   def get_all_followers(flwd_id) do
