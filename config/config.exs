@@ -6,7 +6,7 @@ config :follows_service, Follows.Repo,
   # password: "Uz2Vn2Wr",
   # hostname: "localhost",
   # port: "5432"
-  database: "follows_service_db",
+  database: "postgres",
   username: "postgres",
   password: "postgres",
   hostname: "db"
