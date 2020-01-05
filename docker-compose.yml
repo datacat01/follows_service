@@ -7,38 +7,50 @@ services:
       - zookeeper
       - kafka
       - db
-    environment:
-      WAIT_HOSTS: db:5432
+    working_dir: /opt/follows_service
+    stdin_open: true
+    tty: true
   
   zookeeper:
-    image: wurstmeister/zookeeper
-    ports:
-      - "2181:2181"
-
-  kafka:
-    build: .
-    image: wurstmeister/kafka
-    ports:
-      - "9092:9092"
+    # image: confluentinc/cp-zookeeper
+    image: zookeeper
+    container_name: zookeeper_container
+    volumes: 
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_log:/var/lib/zookeeper/log
+    hostname: zookeeper
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: 192.168.65.1
-      KAFKA_CREATE_TOPICS: "followers"
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+  
+  kafka:
+    # image: confluentinc/cp-kafka
+    image: wurstmeister/kafka
+    container_name: kafka_container
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+    volumes: 
+      - kafka:/var/lib/kafka/data
+    hostname: kafka
+    environment:
+      # KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "follows_topic:1:1:compact,follows_num_topic:1:1,
-      follows_all_topic:1:1,follow_topic:1:1,unfollow_topic:1:1,followers_num_topic:1:1,followers_all_topic:1:1"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      # zookeeper.connect: Specifies the ZooKeeper connection string in the form hostname:port
+      # where host and port are the host and port of a ZooKeeper server.
 
-  # db:
-  #   image: postgres:12.1
-  #   restart: always
-  #   ports:
-  #     - 5432:5432
-  #   hostname: localhost
-  #   environment: 
-  #     POSTGRES_PASSWORD: Uz2Vn2Wr
-  #     POSTGRES_USER: olyapashneva
-  #     POSTGRES_DB: follows_service_repo
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      # advertised.listeners: Listeners to publish to ZooKeeper for clients to use,
+      # if different than the listeners config property.
+
+      KAFKA_LISTENERS: PLAINTEXT://kafka:9092
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CREATE_TOPICS: "follows_topic:1:1:compact,follows_num_topic:1:1,follows_all_topic:1:1,follow_topic:1:1,unfollow_topic:1:1,followers_num_topic:1:1,followers_all_topic:1:1"
+
   db:
     image: postgres
     environment:
@@ -49,4 +61,10 @@ services:
       - ./pgdata:/var/lib/postgresql/data
     hostname: db
     ports:
-      - "5432:5432"
+      - 5432:5432
+  
+volumes: 
+  db:
+  kafka:
+  zookeeper_data:
+  zookeeper_log:

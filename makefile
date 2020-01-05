@@ -1,4 +1,4 @@
-.PHONY: help clean build image run release image docker
+.PHONY: help clean build image run release image docker stop
 
 APP_NAME ?= `grep 'app:' mix.exs | sed -e 's/\[//g' -e 's/ //g' -e 's/app://' -e 's/[:,]//g'`
 APP_VSN ?= `grep 'version:' mix.exs | cut -d '"' -f2`
@@ -14,6 +14,9 @@ clean: ## Clean build artifacts
 run: ## Run the app from Docker
 	# docker run $(APP_NAME):latest
 	docker-compose up
+
+stop:
+	docker-compose down
 
 image: ## Build a Docker image
 	docker build --build-arg APP_NAME=$(APP_NAME) \
