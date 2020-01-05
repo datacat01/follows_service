@@ -12,7 +12,6 @@ clean: ## Clean build artifacts
 	mix clean
 
 run: ## Run the app from Docker
-	# docker run $(APP_NAME):latest
 	docker-compose up
 
 stop:

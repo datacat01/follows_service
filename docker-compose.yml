@@ -12,8 +12,7 @@ services:
     tty: true
   
   zookeeper:
-    # image: confluentinc/cp-zookeeper
-    image: zookeeper
+    image: confluentinc/cp-zookeeper
     container_name: zookeeper_container
     volumes: 
       - zookeeper_data:/var/lib/zookeeper/data
@@ -24,11 +23,10 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
   
   kafka:
-    # image: confluentinc/cp-kafka
-    image: wurstmeister/kafka
-    container_name: kafka_container
+    image: confluentinc/cp-kafka
     depends_on:
       - zookeeper
+    container_name: kafka_container
     ports:
       - 9092:9092
     volumes: 

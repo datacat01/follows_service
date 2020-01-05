@@ -67,7 +67,7 @@ RUN \
 FROM alpine:${ALPINE_VERSION}
 
 # The name of your application/release (required)
-ARG APP_NAME"follows_service"
+ARG APP_NAME="follows_service"
 
 RUN apk update && \
     apk add --no-cache \
@@ -84,4 +84,5 @@ COPY --from=builder /opt/built .
 USER root
 EXPOSE 8081 50051
 
-CMD trap 'exit' INT; /opt/${APP_NAME}/bin/${APP_NAME} foreground
+# CMD trap 'exit' INT; /opt/${APP_NAME}/bin/${APP_NAME} foreground
+CMD /bin/bash
