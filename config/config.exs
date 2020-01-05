@@ -1,10 +1,16 @@
 import Config
 
 config :follows_service, Follows.Repo,
-  database: "follows_service_repo",
-  username: "olyapashneva",
-  password: "Uz2Vn2Wr",
-  hostname: "localhost"
+  # database: "follows_service_repo",
+  # username: "olyapashneva",
+  # password: "Uz2Vn2Wr",
+  # hostname: "localhost",
+  # port: "5432"
+  database: "follows_service_db",
+  username: "postgres",
+  password: "postgres",
+  hostname: "db"
+
 
 config :kaffe,
   producer: [

@@ -12,8 +12,8 @@ clean: ## Clean build artifacts
 	mix clean
 
 run: ## Run the app from Docker
-	docker run --expose 4000 -p 4000:4000 \
-		--rm -it $(APP_NAME):latest
+	# docker run $(APP_NAME):latest
+	docker-compose up
 
 image: ## Build a Docker image
 	docker build --build-arg APP_NAME=$(APP_NAME) \

@@ -1,6 +1,6 @@
 # The version of Alpine to use for the final image
 # This should match the version of Alpine that the `elixir:1.7.2-alpine` image uses
-ARG ALPINE_VERSION=3.8
+ARG ALPINE_VERSION=3.9
 
 FROM elixir:1.9.1-alpine AS builder
 
@@ -72,7 +72,7 @@ ARG APP_NAME
 RUN apk update && \
     apk add --no-cache \
       bash \
-      openssl-dev
+      openssl
 
 ENV REPLACE_OS_VARS=true \
     APP_NAME=${APP_NAME}
@@ -80,5 +80,8 @@ ENV REPLACE_OS_VARS=true \
 WORKDIR /opt/${APP_NAME}
 
 COPY --from=builder /opt/built .
+
+USER root
+EXPOSE 8081 50051
 
 CMD trap 'exit' INT; /opt/${APP_NAME}/bin/${APP_NAME} foreground
